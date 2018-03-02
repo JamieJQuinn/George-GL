@@ -33,36 +33,17 @@ function main() {
     return;
   }
 
-  const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
-  const programInfo = {
-    program: shaderProgram,
-    attribLocations: {
-      vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
-      textureCoord: gl.getAttribLocation(shaderProgram, 'aTextureCoord'),
-    },
-    uniformLocations: {
-      uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
-    },
-  };
+  // Load screen rendering info
+  const screenProgramInfo = loadScreenProgramInfo(gl);
 
   // Load texture
   const texture = loadTexture(gl, canvas.width, canvas.height);
-  const blueTexture = loadBlueTexture(gl, 1, 1);
-
-  // Create and bind the framebuffer
-  const fb = gl.createFramebuffer();
-  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-
-  // attach the texture as the first color attachment
-  const attachmentPoint = gl.COLOR_ATTACHMENT0;
-  const level = 0;
-  gl.framebufferTexture2D(gl.FRAMEBUFFER, attachmentPoint, gl.TEXTURE_2D, texture, level);
 
   var buffers = initBuffers(gl);
-  drawScene(gl, programInfo, buffers, blueTexture);
 
-  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-  drawScene(gl, programInfo, buffers, texture);
+  loadInitialConditions(gl, buffers, texture);
+
+  drawToScreen(gl, screenProgramInfo, buffers, texture);
 }
 
 main();

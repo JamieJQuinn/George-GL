@@ -26,10 +26,10 @@ function initBuffers(gl) {
 
   const textureCoordinates = [
     // Main Square
-    0.0,  0.0,
-    1.0,  0.0,
     1.0,  1.0,
     0.0,  1.0,
+    1.0,  0.0,
+    0.0,  0.0,
   ];
 
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),
@@ -41,7 +41,7 @@ function initBuffers(gl) {
   };
 }
 
-function drawScene(gl, programInfo, buffers, texture_in) {
+function drawScene(gl, programInfo, buffers, texture=null) {
   gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
 
   // Clear the canvas before we start drawing on it.
@@ -71,6 +71,17 @@ function drawScene(gl, programInfo, buffers, texture_in) {
   // Tell WebGL to use our program when drawing
   gl.useProgram(programInfo.program);
 
+  if(texture) {
+    // Tell WebGL we want to affect texture unit 0
+    gl.activeTexture(gl.TEXTURE0);
+
+    // Bind the texture to texture unit 0
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+
+    // Tell the shader we bound the texture to texture unit 0
+    gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
+  }
+
   {
     const num = 2; // every coordinate composed of 2 values
     const type = gl.FLOAT; // the data in the buffer is 32 bit float
@@ -81,14 +92,6 @@ function drawScene(gl, programInfo, buffers, texture_in) {
     gl.vertexAttribPointer(programInfo.attribLocations.textureCoord, num, type, normalize, stride, offset);
     gl.enableVertexAttribArray(programInfo.attribLocations.textureCoord);
   }
-    // Tell WebGL we want to affect texture unit 0
-  gl.activeTexture(gl.TEXTURE0);
-
-  // Bind the texture to texture unit 0
-  gl.bindTexture(gl.TEXTURE_2D, texture_in);
-
-  // Tell the shader we bound the texture to texture unit 0
-  gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
 
   {
     const offset = 0;
@@ -193,4 +196,49 @@ function loadBlueTexture(gl, width_in, height_in) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 
   return texture;
+}
+
+function loadScreenProgramInfo(gl) {
+  // Vertex shader
+  const vsSource = `
+    attribute vec4 aVertexPosition;
+    attribute vec2 aTextureCoord;
+
+    varying highp vec2 vTextureCoord;
+
+    void main(void) {
+      gl_Position = aVertexPosition;
+      vTextureCoord = aTextureCoord;
+    }
+  `;
+
+  // Fragment shader
+  const fsSource = `
+    varying highp vec2 vTextureCoord;
+
+    uniform sampler2D uSampler;
+
+    void main(void) {
+      gl_FragColor = texture2D(uSampler, vTextureCoord);
+    }
+  `;
+
+  const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+  const programInfo = {
+    program: shaderProgram,
+    attribLocations: {
+      vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
+      textureCoord: gl.getAttribLocation(shaderProgram, 'aTextureCoord'),
+    },
+    uniformLocations: {
+      uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
+    },
+  };
+
+  return programInfo;
+}
+
+function drawToScreen(gl, screenProgramInfo, buffers, texture) {
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  drawScene(gl, screenProgramInfo, buffers, texture);
 }
