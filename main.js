@@ -1,17 +1,24 @@
 // Vertex shader
-
 const vsSource = `
   attribute vec4 aVertexPosition;
+  attribute vec2 aTextureCoord;
 
-  void main() {
+  varying highp vec2 vTextureCoord;
+
+  void main(void) {
     gl_Position = aVertexPosition;
+    vTextureCoord = aTextureCoord;
   }
 `;
 
 // Fragment shader
 const fsSource = `
-  void main() {
-    gl_FragColor = vec4(0.0, 0.5, 0.0, 1.0);
+  varying highp vec2 vTextureCoord;
+
+  uniform sampler2D uSampler;
+
+  void main(void) {
+    gl_FragColor = texture2D(uSampler, vTextureCoord);
   }
 `;
 
@@ -31,11 +38,18 @@ function main() {
     program: shaderProgram,
     attribLocations: {
       vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
+      textureCoord: gl.getAttribLocation(shaderProgram, 'aTextureCoord'),
+    },
+    uniformLocations: {
+      uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
     },
   };
 
+  // Load texture
+  const texture = loadTexture(gl);
+
   var buffers = initBuffers(gl);
-  drawScene(gl, programInfo, buffers);
+  drawScene(gl, programInfo, buffers, texture);
 }
 
 main();
