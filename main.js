@@ -46,9 +46,22 @@ function main() {
   };
 
   // Load texture
-  const texture = loadTexture(gl);
+  const texture = loadTexture(gl, canvas.width, canvas.height);
+  const blueTexture = loadBlueTexture(gl, 1, 1);
+
+  // Create and bind the framebuffer
+  const fb = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+
+  // attach the texture as the first color attachment
+  const attachmentPoint = gl.COLOR_ATTACHMENT0;
+  const level = 0;
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, attachmentPoint, gl.TEXTURE_2D, texture, level);
 
   var buffers = initBuffers(gl);
+  drawScene(gl, programInfo, buffers, blueTexture);
+
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   drawScene(gl, programInfo, buffers, texture);
 }
 

@@ -41,7 +41,7 @@ function initBuffers(gl) {
   };
 }
 
-function drawScene(gl, programInfo, buffers, texture) {
+function drawScene(gl, programInfo, buffers, texture_in) {
   gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
 
   // Clear the canvas before we start drawing on it.
@@ -85,7 +85,7 @@ function drawScene(gl, programInfo, buffers, texture) {
   gl.activeTexture(gl.TEXTURE0);
 
   // Bind the texture to texture unit 0
-  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.bindTexture(gl.TEXTURE_2D, texture_in);
 
   // Tell the shader we bound the texture to texture unit 0
   gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
@@ -140,7 +140,7 @@ function loadShader(gl, type, source) {
 //
 // Initialize a texture
 //
-function loadTexture(gl) {
+function loadTexture(gl, width_in, height_in) {
   const texture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, texture);
 
@@ -151,8 +151,35 @@ function loadTexture(gl) {
   // we'll update the texture with the contents of the image.
   const level = 0;
   const internalFormat = gl.RGBA;
-  const width = 1;
-  const height = 1;
+  const width = width_in;
+  const height = height_in;
+  const border = 0;
+  const srcFormat = gl.RGBA;
+  const srcType = gl.UNSIGNED_BYTE;
+  gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
+                width, height, border, srcFormat, srcType,
+                null);
+
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+  return texture;
+}
+
+function loadBlueTexture(gl, width_in, height_in) {
+  const texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  // Because images have to be download over the internet
+  // they might take a moment until they are ready.
+  // Until then put a single pixel in the texture so we can
+  // use it immediately. When the image has finished downloading
+  // we'll update the texture with the contents of the image.
+  const level = 0;
+  const internalFormat = gl.RGBA;
+  const width = width_in;
+  const height = height_in;
   const border = 0;
   const srcFormat = gl.RGBA;
   const srcType = gl.UNSIGNED_BYTE;
