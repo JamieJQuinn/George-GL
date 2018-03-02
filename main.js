@@ -1,8 +1,20 @@
-main();
+// Vertex shader
 
-//
-// start here
-//
+const vsSource = `
+  attribute vec4 aVertexPosition;
+
+  void main() {
+    gl_Position = aVertexPosition;
+  }
+`;
+
+// Fragment shader
+const fsSource = `
+  void main() {
+    gl_FragColor = vec4(0.0, 0.5, 0.0, 1.0);
+  }
+`;
+
 function main() {
   const canvas = document.querySelector("#glCanvas");
   // Initialize the GL context
@@ -14,8 +26,16 @@ function main() {
     return;
   }
 
-  // Set clear color to green, fully opaque
-  gl.clearColor(0.0, 0.5, 0.0, 1.0);
-  // Clear the color buffer with specified clear color
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
+  const programInfo = {
+    program: shaderProgram,
+    attribLocations: {
+      vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
+    },
+  };
+
+  var buffers = initBuffers(gl);
+  drawScene(gl, programInfo, buffers);
 }
+
+main();
