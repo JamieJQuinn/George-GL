@@ -1,4 +1,4 @@
-function loadInitialProgramInfo(gl) {
+function loadSimProgramInfo(gl, buffers, texture) {
   // Vertex shader
   const vsSource = `
     attribute vec4 aVertexPosition;
@@ -17,9 +17,11 @@ function loadInitialProgramInfo(gl) {
     precision highp float;
     varying highp vec2 vTextureCoord;
 
+    uniform sampler2D uSampler;
+
     void main(void) {
-      float r = sqrt(pow(vTextureCoord[0] - 0.5, 2.0) + pow(vTextureCoord[1] - 0.5, 2.0));
-      gl_FragColor = vec4(0.5-pow(r,2.0), 0.0, 0.0, 1.0);
+      gl_FragColor = texture2D(uSampler, vTextureCoord);
+      //gl_FragColor = texture2D(uSampler, vec2(vTextureCoord[0]+0.01, vTextureCoord[1]));
     }
   `;
 
@@ -30,13 +32,10 @@ function loadInitialProgramInfo(gl) {
       vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
       textureCoord: gl.getAttribLocation(shaderProgram, 'aTextureCoord'),
     },
+    uniformLocations: {
+      uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
+    },
   };
 
   return programInfo;
-}
-
-function loadInitialConditions(gl, buffers, fb, texture) {
-  var programInfo = loadInitialProgramInfo(gl);
-  bindTextureAsFramebuffer(gl, fb, texture);
-  drawScene(gl, programInfo, buffers);
 }

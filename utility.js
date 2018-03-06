@@ -41,7 +41,27 @@ function initBuffers(gl) {
   };
 }
 
-function drawScene(gl, programInfo, buffers, texture=null) {
+function bindTextureAsSampler(gl, programInfo, texture) {
+  // Tell WebGL we want to affect texture unit 0
+  gl.activeTexture(gl.TEXTURE0);
+
+  // Bind the texture to texture unit 0
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  // Tell the shader we bound the texture to texture unit 0
+  gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
+}
+
+function bindTextureAsFramebuffer(gl, fb, texture) {
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+
+  // attach the texture as the first color attachment
+  const attachmentPoint = gl.COLOR_ATTACHMENT0;
+  const level = 0;
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, attachmentPoint, gl.TEXTURE_2D, texture, level);
+}
+
+function drawScene(gl, programInfo, buffers, sampling_texture=null) {
   gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
 
   // Clear the canvas before we start drawing on it.
@@ -71,15 +91,8 @@ function drawScene(gl, programInfo, buffers, texture=null) {
   // Tell WebGL to use our program when drawing
   gl.useProgram(programInfo.program);
 
-  if(texture) {
-    // Tell WebGL we want to affect texture unit 0
-    gl.activeTexture(gl.TEXTURE0);
-
-    // Bind the texture to texture unit 0
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-
-    // Tell the shader we bound the texture to texture unit 0
-    gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
+  if(sampling_texture) {
+    bindTextureAsSampler(gl, programInfo, sampling_texture);
   }
 
   {
