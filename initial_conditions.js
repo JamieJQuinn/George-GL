@@ -14,10 +14,12 @@ function loadInitialConditions(gl, buffers, texture) {
 
   // Fragment shader
   const fsSource = `
+    precision highp float;
     varying highp vec2 vTextureCoord;
 
     void main(void) {
-      gl_FragColor = vec4(vTextureCoord[1], 0.0, 0.0, 1.0);
+      float r = sqrt(pow(vTextureCoord[0] - 0.5, 2.0) + pow(vTextureCoord[1] - 0.5, 2.0));
+      gl_FragColor = vec4(0.5-pow(r,2.0), 0.0, 0.0, 1.0);
     }
   `;
 
