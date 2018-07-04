@@ -1,46 +1,3 @@
-function initBuffers(gl) {
-  // Create a buffer for the square's positions.
-  const positionBuffer = gl.createBuffer();
-
-  // Select the positionBuffer as the one to apply buffer
-  // operations to from here out.
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-
-  // Now create an array of positions for the square.
-  const positions = [
-     1.0,  1.0,
-    -1.0,  1.0,
-     1.0, -1.0,
-    -1.0, -1.0,
-  ];
-
-  // Now pass the list of positions into WebGL to build the
-  // shape. We do this by creating a Float32Array from the
-  // JavaScript array, then use it to fill the current buffer.
-  gl.bufferData(gl.ARRAY_BUFFER,
-                new Float32Array(positions),
-                gl.STATIC_DRAW);
-
-  const textureCoordBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
-
-  const textureCoordinates = [
-    // Main Square
-    1.0,  1.0,
-    0.0,  1.0,
-    1.0,  0.0,
-    0.0,  0.0,
-  ];
-
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),
-                gl.STATIC_DRAW);
-
-  return {
-    position: positionBuffer,
-    textureCoord: textureCoordBuffer,
-  };
-}
-
 function bindTextureAsSampler(gl, programInfo, texture) {
   // Tell WebGL we want to affect texture unit 0
   gl.activeTexture(gl.TEXTURE0);
@@ -52,41 +9,56 @@ function bindTextureAsSampler(gl, programInfo, texture) {
   gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
 }
 
-function bindTextureAsFramebuffer(gl, fb, texture) {
-  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+function setupVAO(gl, programInfo) {
+  var vao = gl.createVertexArray();
+  gl.bindVertexArray(vao);
 
-  // attach the texture as the first color attachment
-  const attachmentPoint = gl.COLOR_ATTACHMENT0;
-  const level = 0;
-  gl.framebufferTexture2D(gl.FRAMEBUFFER, attachmentPoint, gl.TEXTURE_2D, texture, level);
+  const num = 2;  // pull out 2 values per iteration
+  const type = gl.FLOAT;    // the data in the buffer is 32bit floats
+  const normalize = false;  // don't normalize
+  const stride = 0;         // how many bytes to get from one set of values to the next
+                            // 0 = use type and numComponents above
+  const offset = 0;         // how many bytes inside the buffer to start from
+
+  // Create and bind position buffer
+  const positionBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  const positions = [
+     1.0,  1.0,
+    -1.0,  1.0,
+     1.0, -1.0,
+    -1.0, -1.0,
+  ];
+  gl.bufferData(gl.ARRAY_BUFFER,
+                new Float32Array(positions),
+                gl.STATIC_DRAW);
+
+  gl.vertexAttribPointer(
+    programInfo.attribLocations.vertexPosition, num, type, normalize, stride, offset);
+  gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
+
+  if(programInfo.attribLocations.textureCoord != -1) {
+    // Create and bind texture buffer
+    const textureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
+    const textureCoordinates = [
+      // Main Square
+      1.0,  1.0,
+      0.0,  1.0,
+      1.0,  0.0,
+      0.0,  0.0,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),
+                  gl.STATIC_DRAW);
+    gl.vertexAttribPointer(
+      programInfo.attribLocations.textureCoord, num, type, normalize, stride, offset);
+    gl.enableVertexAttribArray(programInfo.attribLocations.textureCoord);
+  }
+
+  return vao;
 }
 
 function drawScene(gl, programInfo, buffers, sampling_texture=null, bindUniforms=null) {
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
-
-  // Clear the canvas before we start drawing on it.
-  gl.clear(gl.COLOR_BUFFER_BIT);
-
-  // Tell WebGL how to pull out the positions from the position
-  // buffer into the vertexPosition attribute.
-  {
-    const numComponents = 2;  // pull out 2 values per iteration
-    const type = gl.FLOAT;    // the data in the buffer is 32bit floats
-    const normalize = false;  // don't normalize
-    const stride = 0;         // how many bytes to get from one set of values to the next
-                              // 0 = use type and numComponents above
-    const offset = 0;         // how many bytes inside the buffer to start from
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
-    gl.vertexAttribPointer(
-        programInfo.attribLocations.vertexPosition,
-        numComponents,
-        type,
-        normalize,
-        stride,
-        offset);
-    gl.enableVertexAttribArray(
-        programInfo.attribLocations.vertexPosition);
-  }
 
   // Tell WebGL to use our program when drawing
   gl.useProgram(programInfo.program);
@@ -97,17 +69,6 @@ function drawScene(gl, programInfo, buffers, sampling_texture=null, bindUniforms
 
   if (bindUniforms) {
     bindUniforms();
-  }
-
-  {
-    const num = 2; // every coordinate composed of 2 values
-    const type = gl.FLOAT; // the data in the buffer is 32 bit float
-    const normalize = false; // don't normalize
-    const stride = 0; // how many bytes to get from one set to the next
-    const offset = 0; // how many bytes inside the buffer to start from
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.textureCoord);
-    gl.vertexAttribPointer(programInfo.attribLocations.textureCoord, num, type, normalize, stride, offset);
-    gl.enableVertexAttribArray(programInfo.attribLocations.textureCoord);
   }
 
   {
@@ -157,18 +118,10 @@ function loadShader(gl, type, source) {
   return shader;
 }
 
-//
-// Initialize a texture
-//
 function loadTexture(gl, width_in, height_in) {
   const texture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, texture);
 
-  // Because images have to be download over the internet
-  // they might take a moment until they are ready.
-  // Until then put a single pixel in the texture so we can
-  // use it immediately. When the image has finished downloading
-  // we'll update the texture with the contents of the image.
   const level = 0;
   const internalFormat = gl.RGBA;
   const width = width_in;
@@ -189,11 +142,12 @@ function loadTexture(gl, width_in, height_in) {
 
 function loadScreenProgramInfo(gl) {
   // Vertex shader
-  const vsSource = `
-    attribute vec4 aVertexPosition;
-    attribute vec2 aTextureCoord;
+  const vsSource = `#version 300 es
 
-    varying highp vec2 vTextureCoord;
+    in vec4 aVertexPosition;
+    in vec2 aTextureCoord;
+
+    out vec2 vTextureCoord;
 
     void main(void) {
       gl_Position = aVertexPosition;
@@ -202,13 +156,18 @@ function loadScreenProgramInfo(gl) {
   `;
 
   // Fragment shader
-  const fsSource = `
-    varying highp vec2 vTextureCoord;
+  const fsSource = `#version 300 es
+
+    precision mediump float;
+
+    in vec2 vTextureCoord;
 
     uniform sampler2D uSampler;
 
+    out vec4 outColour;
+
     void main(void) {
-      gl_FragColor = texture2D(uSampler, vTextureCoord);
+      outColour = texture(uSampler, vTextureCoord);
     }
   `;
 
@@ -229,5 +188,7 @@ function loadScreenProgramInfo(gl) {
 
 function drawToScreen(gl, screenProgramInfo, buffers, texture) {
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
+  gl.clear(gl.COLOR_BUFFER_BIT);
   drawScene(gl, screenProgramInfo, buffers, texture);
 }
