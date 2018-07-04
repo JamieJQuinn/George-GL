@@ -35,7 +35,7 @@ function main() {
   loadInitialConditions(gl, framebuffers[0]);
   //loadInitialConditions(gl, null);
 
-  runSimulation(gl, framebuffers, textures);
+  runSimulation(gl, framebuffers, textures, screenInfo);
 
   drawToScreen(gl, screenInfo, textures[1]);
 }
