@@ -50,29 +50,26 @@ function loop(gl, framebuffers, textures, screenInfo, simInfo, boundaryInfo, sim
 
   gl.useProgram(simInfo.program);
   gl.bindVertexArray(simInfo.vao);
-  gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers[1 + (count % 2)]);
-  bindTextureAsSampler(gl, simInfo, textures[0 + (count % 2)]);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers[(1 + count) % 2]);
+  bindTextureAsSampler(gl, simInfo, textures[(0 + count) % 2]);
 
   gl.uniform1f(simInfo.uniformLocations.time, time/1000);
 
-  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-  gl.clearColor(0.0, 0.0, 1.0, 1.0);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-  const offset = 0;
-  const vertexCount = 4;
-  gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-  applyBoundaryConditions(gl, framebuffers[1 + (count % 2)], textures[0 + (count % 2)], simInfo, boundaryInfo);
+  applyBoundaryConditions(gl, framebuffers[(1 + count) % 2], textures[0 + (count % 2)], simInfo, boundaryInfo);
 
-  //drawToScreen(gl, screenInfo, textures[count]);
+  drawToScreen(gl, screenInfo, textures[count%2]);
 
   simVars.timePrev = time;
   simVars.count++;
 
-  window.requestAnimationFrame(function (tFrame) {
-    simVars.time = tFrame;
-    loop(gl, framebuffers, textures, screenInfo, simInfo, boundaryInfo, simVars);
-  });
+  setTimeout(function () {
+    window.requestAnimationFrame(function (tFrame) {
+      simVars.time = tFrame;
+      loop(gl, framebuffers, textures, screenInfo, simInfo, boundaryInfo, simVars);
+    });
+  }, 1000/30);
 }
 
 function runSimulation(gl, framebuffers, textures, screenInfo) {

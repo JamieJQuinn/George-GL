@@ -23,7 +23,7 @@ function loadBoundaryInfo(gl) {
     void main(void) {
       //gl_FragColor = texture2D(uSampler, vTextureCoord);
       //gl_FragColor = texture2D(uSampler, vec2(vTextureCoord[0]+sin(time), vTextureCoord[1]));
-      gl_FragColor = vec4(0,1,1,1);
+      gl_FragColor = vec4(0,0,0,0);
     }
   `;
 
