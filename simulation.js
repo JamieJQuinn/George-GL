@@ -18,10 +18,11 @@ function loadSimProgramInfo(gl, buffers, texture) {
     varying highp vec2 vTextureCoord;
 
     uniform sampler2D uSampler;
+    uniform float time;
 
     void main(void) {
-      gl_FragColor = texture2D(uSampler, vTextureCoord);
-      //gl_FragColor = texture2D(uSampler, vec2(vTextureCoord[0]+0.01, vTextureCoord[1]));
+      //gl_FragColor = texture2D(uSampler, vTextureCoord);
+      gl_FragColor = texture2D(uSampler, vec2(vTextureCoord[0]+time, vTextureCoord[1]));
     }
   `;
 
@@ -34,6 +35,7 @@ function loadSimProgramInfo(gl, buffers, texture) {
     },
     uniformLocations: {
       uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
+      time: gl.getUniformLocation(shaderProgram, 'time'),
     },
   };
 

@@ -61,7 +61,7 @@ function bindTextureAsFramebuffer(gl, fb, texture) {
   gl.framebufferTexture2D(gl.FRAMEBUFFER, attachmentPoint, gl.TEXTURE_2D, texture, level);
 }
 
-function drawScene(gl, programInfo, buffers, sampling_texture=null) {
+function drawScene(gl, programInfo, buffers, sampling_texture=null, bindUniforms=null) {
   gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
 
   // Clear the canvas before we start drawing on it.
@@ -93,6 +93,10 @@ function drawScene(gl, programInfo, buffers, sampling_texture=null) {
 
   if(sampling_texture) {
     bindTextureAsSampler(gl, programInfo, sampling_texture);
+  }
+
+  if (bindUniforms) {
+    bindUniforms();
   }
 
   {

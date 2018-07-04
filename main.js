@@ -1,4 +1,19 @@
-var Nt = 2;
+var current = 1;
+var time = 0;
+
+function draw(gl, fb, textures, buffers, simProgramInfo, screenProgramInfo) {
+  bindTextureAsFramebuffer(gl, fb, textures[current]);
+  drawScene(gl, simProgramInfo, buffers, textures[(current+1)%2], function () {
+    gl.uniform1f(simProgramInfo.uniformLocations.time, time);
+  });
+  current += 1;
+  time += 1;
+  if(time < 10) {
+    window.requestAnimationFrame(function () {
+      draw(gl, fb, textures, buffers, simProgramInfo, screenProgramInfo);
+    });
+  }
+}
 
 function main() {
   const canvas = document.querySelector("#glCanvas");
@@ -24,22 +39,11 @@ function main() {
   const fb = gl.createFramebuffer();
 
   loadInitialConditions(gl, buffers, fb, textures[0]);
-  var simProgramInfo = loadSimProgramInfo(gl);
+  //var simProgramInfo = loadSimProgramInfo(gl);
 
-  // Load blocker
-  var sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
-
-  var current = 1;
-
-  for(var i=0; i<Nt; ++i) {
-    bindTextureAsFramebuffer(gl, fb, textures[current]);
-    drawScene(gl, simProgramInfo, buffers, textures[(current+1)%2]);
-    var status = gl.clientWaitSync(sync, 0, 0);
-    if (!status) {
-      console.log("uh oh");
-    }
-    current += 1;
-  }
+  //window.requestAnimationFrame(function () {
+    //draw(gl, fb, textures, buffers, simProgramInfo, screenProgramInfo);
+  //});
 
   drawToScreen(gl, screenProgramInfo, buffers, textures[current]);
 }
