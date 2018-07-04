@@ -50,19 +50,20 @@ function main() {
     );
   }
 
-  //loadInitialConditions(gl, framebuffers[0], textures[0]);
-  loadInitialConditions(gl, null, textures[0]);
+  loadInitialConditions(gl, framebuffers[0], textures[0]);
+  //loadInitialConditions(gl, null, textures[0]);
 
   // Draw to Screen
-  //gl.useProgram(screenProgramInfo.program);
-  //gl.bindVertexArray(screenVAO);
-  //bindTextureAsSampler(gl, screenProgramInfo, texture[0]);
-  //gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-  //gl.clearColor(0.0, 0.0, 1.0, 1.0);
-  //gl.clear(gl.COLOR_BUFFER_BIT);
-  //const offset = 0;
-  //const vertexCount = 4;
-  //gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
+  gl.useProgram(screenProgramInfo.program);
+  gl.bindVertexArray(screenVAO);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  bindTextureAsSampler(gl, screenProgramInfo, textures[0]);
+  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+  gl.clearColor(0.0, 0.0, 1.0, 1.0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  const offset = 0;
+  const vertexCount = 4;
+  gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
 
 
 
