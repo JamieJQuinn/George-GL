@@ -48,10 +48,5 @@ function loadInitialConditions(gl, fb) {
   // Bind correct framebuffer
   gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
   // Finally draw
-  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-  gl.clearColor(0.0, 0.0, 1.0, 1.0);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-  const offset = 0;
-  const vertexCount = 4;
-  gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }

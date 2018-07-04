@@ -22,7 +22,7 @@ function loadSimInfo(gl) {
 
     void main(void) {
       //gl_FragColor = texture2D(uSampler, vTextureCoord);
-      gl_FragColor = texture2D(uSampler, vec2(vTextureCoord[0]+sin(time), vTextureCoord[1]));
+      gl_FragColor = texture2D(uSampler, vec2(vTextureCoord[0]+0.1*sin(time), vTextureCoord[1]+0.1*cos(time)));
     }
   `;
 
@@ -44,7 +44,7 @@ function loadSimInfo(gl) {
   return info;
 }
 
-function loop(gl, framebuffers, textures, screenInfo, simInfo, simVars) {
+function loop(gl, framebuffers, textures, screenInfo, simInfo, boundaryInfo, simVars) {
   var count = simVars.count;
   var time = simVars.time;
 
@@ -62,6 +62,8 @@ function loop(gl, framebuffers, textures, screenInfo, simInfo, simVars) {
   const vertexCount = 4;
   gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
 
+  applyBoundaryConditions(gl, framebuffers[1 + (count % 2)], textures[0 + (count % 2)], simInfo, boundaryInfo);
+
   //drawToScreen(gl, screenInfo, textures[count]);
 
   simVars.timePrev = time;
@@ -69,12 +71,13 @@ function loop(gl, framebuffers, textures, screenInfo, simInfo, simVars) {
 
   window.requestAnimationFrame(function (tFrame) {
     simVars.time = tFrame;
-    loop(gl, framebuffers, textures, screenInfo, simInfo, simVars);
+    loop(gl, framebuffers, textures, screenInfo, simInfo, boundaryInfo, simVars);
   });
 }
 
 function runSimulation(gl, framebuffers, textures, screenInfo) {
   const simInfo = loadSimInfo(gl);
+  const boundaryInfo = loadBoundaryInfo(gl);
 
   var simVars = {
     time: 0,
@@ -82,5 +85,5 @@ function runSimulation(gl, framebuffers, textures, screenInfo) {
     count: 0,
   };
 
-  loop(gl, framebuffers, textures, screenInfo, simInfo, simVars)
+  loop(gl, framebuffers, textures, screenInfo, simInfo, boundaryInfo, simVars)
 }
