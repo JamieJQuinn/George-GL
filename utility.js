@@ -58,26 +58,6 @@ function setupVAO(gl, programInfo) {
   return vao;
 }
 
-function drawScene(gl, programInfo, buffers, sampling_texture=null, bindUniforms=null) {
-
-  // Tell WebGL to use our program when drawing
-  gl.useProgram(programInfo.program);
-
-  if(sampling_texture) {
-    bindTextureAsSampler(gl, programInfo, sampling_texture);
-  }
-
-  if (bindUniforms) {
-    bindUniforms();
-  }
-
-  {
-    const offset = 0;
-    const vertexCount = 4;
-    gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
-  }
-}
-
 function initShaderProgram(gl, vsSource, fsSource) {
   // Initialize a shader program, so WebGL knows how to draw our data
   const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
@@ -186,9 +166,15 @@ function loadScreenProgramInfo(gl) {
   return programInfo;
 }
 
-function drawToScreen(gl, screenProgramInfo, buffers, texture) {
+function drawToScreen(gl, screenProgramInfo, screenVAO, texture) {
+  gl.useProgram(screenProgramInfo.program);
+  gl.bindVertexArray(screenVAO);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
+  bindTextureAsSampler(gl, screenProgramInfo, texture);
+  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+  gl.clearColor(0.0, 0.0, 1.0, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
-  drawScene(gl, screenProgramInfo, buffers, texture);
+  const offset = 0;
+  const vertexCount = 4;
+  gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
 }

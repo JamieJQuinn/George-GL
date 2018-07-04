@@ -28,7 +28,11 @@ function main() {
 
   // Load screen rendering info
   const screenProgramInfo = loadScreenProgramInfo(gl);
-  var screenVAO = setupVAO(gl, screenProgramInfo);
+  const screenVAO = setupVAO(gl, screenProgramInfo);
+
+  // Load texture-to-texture (i.e. simulation) rendering info
+  const simProgramInfo = loadSimProgramInfo(gl);
+  const simVAO = setupVAO(gl, simProgramInfo);
 
   // Load textures
   var textures = [];
@@ -50,14 +54,15 @@ function main() {
     );
   }
 
-  loadInitialConditions(gl, framebuffers[0], textures[0]);
-  //loadInitialConditions(gl, null, textures[0]);
+  loadInitialConditions(gl, framebuffers[0]);
+  //loadInitialConditions(gl, null);
 
-  // Draw to Screen
-  gl.useProgram(screenProgramInfo.program);
-  gl.bindVertexArray(screenVAO);
-  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-  bindTextureAsSampler(gl, screenProgramInfo, textures[0]);
+  gl.useProgram(simProgramInfo.program);
+  gl.bindVertexArray(simVAO);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers[1]);
+  bindTextureAsSampler(gl, simProgramInfo, textures[0]);
+
+  gl.uniform1f(simProgramInfo.uniformLocations.time, 0.5);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
   gl.clearColor(0.0, 0.0, 1.0, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
@@ -65,16 +70,7 @@ function main() {
   const vertexCount = 4;
   gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
 
-
-
-
-  //drawToScreen(gl, screenProgramInfo, buffers, textures[0]);
-  //var simProgramInfo = loadSimProgramInfo(gl);
-
-  //window.requestAnimationFrame(function () {
-    //draw(gl, fb, textures, buffers, simProgramInfo, screenProgramInfo);
-  //});
-
+  drawToScreen(gl, screenProgramInfo, screenVAO, textures[1]);
 }
 
 main();

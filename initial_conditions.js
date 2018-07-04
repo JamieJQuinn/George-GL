@@ -37,7 +37,7 @@ function loadInitialProgramInfo(gl) {
   return programInfo;
 }
 
-function loadInitialConditions(gl, fb, texture) {
+function loadInitialConditions(gl, fb) {
   // Load & use program
   var programInfo = loadInitialProgramInfo(gl);
   gl.useProgram(programInfo.program);

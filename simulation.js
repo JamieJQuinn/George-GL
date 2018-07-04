@@ -1,4 +1,4 @@
-function loadSimProgramInfo(gl, buffers, texture) {
+function loadSimProgramInfo(gl) {
   // Vertex shader
   const vsSource = `
     attribute vec4 aVertexPosition;
