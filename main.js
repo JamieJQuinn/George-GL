@@ -1,20 +1,3 @@
-var current = 1;
-var time = 0;
-
-function draw(gl, fb, textures, buffers, simProgramInfo, screenProgramInfo) {
-  bindTextureAsFramebuffer(gl, fb, textures[current]);
-  drawScene(gl, simProgramInfo, buffers, textures[(current+1)%2], function () {
-    gl.uniform1f(simProgramInfo.uniformLocations.time, time);
-  });
-  current += 1;
-  time += 1;
-  if(time < 10) {
-    window.requestAnimationFrame(function () {
-      draw(gl, fb, textures, buffers, simProgramInfo, screenProgramInfo);
-    });
-  }
-}
-
 function main() {
   const canvas = document.querySelector("#glCanvas");
   // Initialize the GL context
@@ -27,12 +10,7 @@ function main() {
   }
 
   // Load screen rendering info
-  const screenProgramInfo = loadScreenProgramInfo(gl);
-  const screenVAO = setupVAO(gl, screenProgramInfo);
-
-  // Load texture-to-texture (i.e. simulation) rendering info
-  const simProgramInfo = loadSimProgramInfo(gl);
-  const simVAO = setupVAO(gl, simProgramInfo);
+  const screenInfo = loadScreenInfo(gl);
 
   // Load textures
   var textures = [];
@@ -57,20 +35,9 @@ function main() {
   loadInitialConditions(gl, framebuffers[0]);
   //loadInitialConditions(gl, null);
 
-  gl.useProgram(simProgramInfo.program);
-  gl.bindVertexArray(simVAO);
-  gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers[1]);
-  bindTextureAsSampler(gl, simProgramInfo, textures[0]);
+  runSimulation(gl, framebuffers, textures);
 
-  gl.uniform1f(simProgramInfo.uniformLocations.time, 0.5);
-  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-  gl.clearColor(0.0, 0.0, 1.0, 1.0);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-  const offset = 0;
-  const vertexCount = 4;
-  gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
-
-  drawToScreen(gl, screenProgramInfo, screenVAO, textures[1]);
+  drawToScreen(gl, screenInfo, textures[1]);
 }
 
 main();

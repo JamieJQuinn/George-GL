@@ -9,9 +9,9 @@ function bindTextureAsSampler(gl, programInfo, texture) {
   gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
 }
 
-function setupVAO(gl, programInfo) {
-  var vao = gl.createVertexArray();
-  gl.bindVertexArray(vao);
+function setupVAO(gl, info) {
+  info.vao = gl.createVertexArray();
+  gl.bindVertexArray(info.vao);
 
   const num = 2;  // pull out 2 values per iteration
   const type = gl.FLOAT;    // the data in the buffer is 32bit floats
@@ -34,10 +34,10 @@ function setupVAO(gl, programInfo) {
                 gl.STATIC_DRAW);
 
   gl.vertexAttribPointer(
-    programInfo.attribLocations.vertexPosition, num, type, normalize, stride, offset);
-  gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
+    info.attribLocations.vertexPosition, num, type, normalize, stride, offset);
+  gl.enableVertexAttribArray(info.attribLocations.vertexPosition);
 
-  if(programInfo.attribLocations.textureCoord != -1) {
+  if(info.attribLocations.textureCoord != -1) {
     // Create and bind texture buffer
     const textureCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
@@ -51,11 +51,9 @@ function setupVAO(gl, programInfo) {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),
                   gl.STATIC_DRAW);
     gl.vertexAttribPointer(
-      programInfo.attribLocations.textureCoord, num, type, normalize, stride, offset);
-    gl.enableVertexAttribArray(programInfo.attribLocations.textureCoord);
+      info.attribLocations.textureCoord, num, type, normalize, stride, offset);
+    gl.enableVertexAttribArray(info.attribLocations.textureCoord);
   }
-
-  return vao;
 }
 
 function initShaderProgram(gl, vsSource, fsSource) {
@@ -120,7 +118,7 @@ function loadTexture(gl, width_in, height_in) {
   return texture;
 }
 
-function loadScreenProgramInfo(gl) {
+function loadScreenInfo(gl) {
   // Vertex shader
   const vsSource = `#version 300 es
 
@@ -152,7 +150,7 @@ function loadScreenProgramInfo(gl) {
   `;
 
   const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
-  const programInfo = {
+  const info = {
     program: shaderProgram,
     attribLocations: {
       vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
@@ -163,14 +161,16 @@ function loadScreenProgramInfo(gl) {
     },
   };
 
-  return programInfo;
+  setupVAO(gl, info);
+
+  return info;
 }
 
-function drawToScreen(gl, screenProgramInfo, screenVAO, texture) {
-  gl.useProgram(screenProgramInfo.program);
-  gl.bindVertexArray(screenVAO);
+function drawToScreen(gl, screenInfo, texture) {
+  gl.useProgram(screenInfo.program);
+  gl.bindVertexArray(screenInfo.vao);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-  bindTextureAsSampler(gl, screenProgramInfo, texture);
+  bindTextureAsSampler(gl, screenInfo, texture);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
   gl.clearColor(0.0, 0.0, 1.0, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT);

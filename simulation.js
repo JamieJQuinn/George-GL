@@ -1,4 +1,4 @@
-function loadSimProgramInfo(gl) {
+function loadSimInfo(gl) {
   // Vertex shader
   const vsSource = `
     attribute vec4 aVertexPosition;
@@ -27,7 +27,7 @@ function loadSimProgramInfo(gl) {
   `;
 
   const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
-  const programInfo = {
+  const info = {
     program: shaderProgram,
     attribLocations: {
       vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
@@ -39,5 +39,31 @@ function loadSimProgramInfo(gl) {
     },
   };
 
-  return programInfo;
+  setupVAO(gl, info);
+
+  return info;
+}
+
+function runSimulation(gl, framebuffers, textures) {
+  // Load texture-to-texture (i.e. simulation) rendering info
+  const simInfo = loadSimInfo(gl);
+
+  var count = 0;
+  for(var time = 0; time < 1; time += 0.1) {
+    gl.useProgram(simInfo.program);
+    gl.bindVertexArray(simInfo.vao);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers[1 + (count % 2)]);
+    bindTextureAsSampler(gl, simInfo, textures[0 + (count % 2)]);
+
+    gl.uniform1f(simInfo.uniformLocations.time, time);
+
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    gl.clearColor(0.0, 0.0, 1.0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    const offset = 0;
+    const vertexCount = 4;
+    gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
+
+    ++count;
+  }
 }

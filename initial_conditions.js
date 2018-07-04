@@ -26,7 +26,7 @@ function loadInitialProgramInfo(gl) {
   `;
 
   const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
-  const programInfo = {
+  const info = {
     program: shaderProgram,
     attribLocations: {
       vertexPosition: gl.getAttribLocation(shaderProgram, 'aVertexPosition'),
@@ -34,16 +34,17 @@ function loadInitialProgramInfo(gl) {
     },
   };
 
-  return programInfo;
+  setupVAO(gl, info);
+
+  return info;
 }
 
 function loadInitialConditions(gl, fb) {
   // Load & use program
-  var programInfo = loadInitialProgramInfo(gl);
-  gl.useProgram(programInfo.program);
+  var info = loadInitialProgramInfo(gl);
+  gl.useProgram(info.program);
   // Load & use vertex attrib
-  var vao = setupVAO(gl, programInfo);
-  gl.bindVertexArray(vao);
+  gl.bindVertexArray(info.vao);
   // Bind correct framebuffer
   gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
   // Finally draw
