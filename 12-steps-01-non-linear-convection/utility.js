@@ -9,6 +9,7 @@ function bindTextureAsSampler(gl, programInfo, texture) {
   gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
 }
 
+// Sets up vao object to render a simple screen-sized square
 function setupVAO(gl, info) {
   info.vao = gl.createVertexArray();
   gl.bindVertexArray(info.vao);
@@ -96,7 +97,8 @@ function loadShader(gl, type, source) {
   return shader;
 }
 
-function loadTexture(gl, width_in, height_in) {
+// Creates a texture with our required config for simulation
+function createTexture(gl, width_in, height_in) {
   const texture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, texture);
 
@@ -119,6 +121,33 @@ function loadTexture(gl, width_in, height_in) {
   return texture;
 }
 
+function createRenderingSurfaces(gl) {
+  var textures = [];
+  var framebuffers = [];
+
+  for (var ii = 0; ii < 2; ++ii) {
+    var texture = createTexture(gl, gl.canvas.width, gl.canvas.height);
+    textures.push(texture);
+
+    // Create a framebuffer
+    var fbo = gl.createFramebuffer();
+    framebuffers.push(fbo);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+
+    // Attach a texture to it.
+    var attachmentPoint = gl.COLOR_ATTACHMENT0;
+    gl.framebufferTexture2D(
+            gl.FRAMEBUFFER, attachmentPoint, gl.TEXTURE_2D, texture, 0
+    );
+  }
+
+  return {
+    textures: textures,
+    framebuffers: framebuffers
+  }
+}
+
+// Loads shader for rendering simulation texture to screen
 function loadScreenInfo(gl) {
   // Vertex shader
   const vsSource = `#version 300 es

@@ -9,32 +9,7 @@ function main() {
     return;
   }
 
-  // Load screen rendering info
-  const screenInfo = loadScreenInfo(gl);
-
-  // Load textures
-  var textures = [];
-  var framebuffers = [];
-
-  for (var ii = 0; ii < 2; ++ii) {
-    var texture = loadTexture(gl, canvas.width, canvas.height);
-    textures.push(texture);
-
-    // Create a framebuffer
-    var fbo = gl.createFramebuffer();
-    framebuffers.push(fbo);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-
-    // Attach a texture to it.
-    var attachmentPoint = gl.COLOR_ATTACHMENT0;
-    gl.framebufferTexture2D(
-            gl.FRAMEBUFFER, attachmentPoint, gl.TEXTURE_2D, texture, 0
-    );
-  }
-
-  loadInitialConditions(gl, framebuffers[0]);
-
-  runSimulation(gl, framebuffers, textures, screenInfo);
+  startSimulation(gl);
 }
 
 main();

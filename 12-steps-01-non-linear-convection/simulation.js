@@ -1,3 +1,4 @@
+// Setup simulation program
 function loadSimInfo(gl) {
   // Vertex shader
   const vsSource = `#version 300 es
@@ -25,13 +26,16 @@ function loadSimInfo(gl) {
     out vec4 outColour;
 
     void main(void) {
+      // Get variables
       vec2 u = texture(uSampler, vTextureCoord).xy;
       float ink = texture(uSampler, vTextureCoord).z;
       float inkmx = texture(uSampler, vec2(vTextureCoord.x - 1.0/rdxy.x, vTextureCoord.y)).z;
-      float alpha = texture(uSampler, vTextureCoord).w;
+
+      // Perform numerical calculation
       ink = ink - u.x * dt * rdxy.x * (ink - inkmx);
-      //ink = ink - 0.9 * (ink - inkmx);
-      //ink = ink - (ink - inkmx);
+
+      // Output results
+      float alpha = texture(uSampler, vTextureCoord).w;
       outColour = vec4(u, ink, alpha);
     }
   `;
@@ -56,19 +60,23 @@ function loadSimInfo(gl) {
   return info;
 }
 
+// Main rendering/simulation loop
 function loop(gl, framebuffers, textures, screenInfo, simInfo, boundaryInfo, simVars) {
   var count = simVars.count;
   var time = simVars.time;
 
+  // Setup GL rendering
   gl.useProgram(simInfo.program);
   gl.bindVertexArray(simInfo.vao);
   gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers[(1 + count) % 2]);
   bindTextureAsSampler(gl, simInfo, textures[(0 + count) % 2]);
 
+  // Load in uniforms
   gl.uniform1f(simInfo.uniformLocations.time, time/1000);
   gl.uniform1f(simInfo.uniformLocations.dt, 0.9/gl.canvas.width);
   gl.uniform2f(simInfo.uniformLocations.rdxy, gl.canvas.width, gl.canvas.height);
 
+  // Run one cycle of simulation
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
   applyBoundaryConditions(gl, framebuffers[(1 + count) % 2], textures[0 + (count % 2)], simInfo, boundaryInfo);
@@ -86,9 +94,14 @@ function loop(gl, framebuffers, textures, screenInfo, simInfo, boundaryInfo, sim
   }, 1000/30);
 }
 
-function runSimulation(gl, framebuffers, textures, screenInfo) {
+function startSimulation (gl) {
+  surfaces = createRenderingSurfaces(gl);
+
+  loadInitialConditions(gl, surfaces.framebuffers[0]);
+
   const simInfo = loadSimInfo(gl);
   const boundaryInfo = loadBoundaryInfo(gl);
+  const screenInfo = loadScreenInfo(gl);
 
   var simVars = {
     time: 0,
@@ -96,5 +109,5 @@ function runSimulation(gl, framebuffers, textures, screenInfo) {
     count: 0,
   };
 
-  loop(gl, framebuffers, textures, screenInfo, simInfo, boundaryInfo, simVars)
+  loop(gl, surfaces.framebuffers, surfaces.textures, screenInfo, simInfo, boundaryInfo, simVars)
 }
