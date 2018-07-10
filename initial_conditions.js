@@ -19,9 +19,16 @@ function loadInitialProgramInfo(gl) {
 
     out vec4 outColour;
 
+    const float PI = 3.1415926535897932384626433832795;
+
     void main(void) {
-      float r = sqrt(pow(vTextureCoord[0] - 0.5, 2.0) + pow(vTextureCoord[1] - 0.5, 2.0));
-      outColour = vec4(0.5-pow(r,2.0), 0.0, 0.0, 1.0);
+      float r = sqrt(pow(vTextureCoord.x - 0.5, 2.0) + pow(vTextureCoord.y - 0.5, 2.0));
+      vec2 pos = vTextureCoord.xy;
+      if(pos.x > 0.4 && pos.x < 0.6) {
+        outColour = vec4(1.0, 0, 1, 0.0);
+      } else {
+        outColour = vec4(1.0, 0, 0, 0.0);
+      }
     }
   `;
 

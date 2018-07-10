@@ -101,12 +101,12 @@ function loadTexture(gl, width_in, height_in) {
   gl.bindTexture(gl.TEXTURE_2D, texture);
 
   const level = 0;
-  const internalFormat = gl.RGBA;
+  const internalFormat = gl.RGBA32I;
   const width = width_in;
   const height = height_in;
   const border = 0;
-  const srcFormat = gl.RGBA;
-  const srcType = gl.UNSIGNED_BYTE;
+  const srcFormat = gl.RGBA_INTEGER;
+  const srcType = gl.INT;
   gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
                 width, height, border, srcFormat, srcType,
                 null);
@@ -114,6 +114,7 @@ function loadTexture(gl, width_in, height_in) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
   return texture;
 }
@@ -145,7 +146,9 @@ function loadScreenInfo(gl) {
     out vec4 outColour;
 
     void main(void) {
-      outColour = texture(uSampler, vTextureCoord);
+      float ink = texture(uSampler, vTextureCoord).z;
+      outColour = vec4(ink,0,0,1);
+      //outColour = texture(uSampler, vTextureCoord);
     }
   `;
 
