@@ -21,7 +21,7 @@ function loadSimInfo(gl) {
     uniform sampler2D uSampler;
     uniform float time;
     uniform float dt;
-    uniform vec2 rdxy;
+    uniform vec2 dxy;
 
     out vec4 outColour;
 
@@ -29,10 +29,10 @@ function loadSimInfo(gl) {
       // Get variables
       vec2 u = texture(uSampler, vTextureCoord).xy;
       float ink = texture(uSampler, vTextureCoord).z;
-      float inkmx = texture(uSampler, vec2(vTextureCoord.x - 1.0/rdxy.x, vTextureCoord.y)).z;
+      float inkmx = texture(uSampler, vec2(vTextureCoord.x - dxy.x, vTextureCoord.y)).z;
 
       // Perform numerical calculation
-      ink = ink - u.x * dt * rdxy.x * (ink - inkmx);
+      ink = ink - u.x * dt / dxy.x * (ink - inkmx);
 
       // Output results
       float alpha = texture(uSampler, vTextureCoord).w;
@@ -51,7 +51,7 @@ function loadSimInfo(gl) {
       uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
       time: gl.getUniformLocation(shaderProgram, 'time'),
       dt: gl.getUniformLocation(shaderProgram, 'dt'),
-      rdxy: gl.getUniformLocation(shaderProgram, 'rdxy'),
+      dxy: gl.getUniformLocation(shaderProgram, 'dxy'),
     },
   };
 
@@ -74,7 +74,7 @@ function loop(gl, framebuffers, textures, screenInfo, simInfo, boundaryInfo, sim
   // Load in uniforms
   gl.uniform1f(simInfo.uniformLocations.time, time/1000);
   gl.uniform1f(simInfo.uniformLocations.dt, 0.9/gl.canvas.width);
-  gl.uniform2f(simInfo.uniformLocations.rdxy, gl.canvas.width, gl.canvas.height);
+  gl.uniform2f(simInfo.uniformLocations.dxy, 1.0/gl.canvas.width, 1.0/gl.canvas.height);
 
   // Run one cycle of simulation
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
