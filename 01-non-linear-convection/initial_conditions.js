@@ -22,7 +22,6 @@ function loadInitialProgramInfo(gl) {
     const float PI = 3.1415926535897932384626433832795;
 
     void main(void) {
-      float r = sqrt(pow(vTextureCoord.x - 0.5, 2.0) + pow(vTextureCoord.y - 0.5, 2.0));
       vec2 pos = vTextureCoord.xy;
       if(pos.x > 0.1 && pos.x < 0.3) {
         outColour = vec4(1.0, 0, 1, 0.0);
