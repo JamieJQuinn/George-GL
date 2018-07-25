@@ -28,15 +28,14 @@ function loadSimInfo(gl) {
     void main(void) {
       // Get variables
       vec2 u = texture(uSampler, vTextureCoord).xy;
-      float ink = texture(uSampler, vTextureCoord).z;
-      float inkmx = texture(uSampler, vec2(vTextureCoord.x - dxy.x, vTextureCoord.y)).z;
+      vec2 umx = texture(uSampler, vec2(vTextureCoord.x - dxy.x, vTextureCoord.y)).xy;
 
       // Perform numerical calculation
-      ink = ink - u.x * dt / dxy.x * (ink - inkmx);
+      u.x = u.x - u.x * dt / dxy.x * (u.x - umx.x);
 
       // Output results
       float alpha = texture(uSampler, vTextureCoord).w;
-      outColour = vec4(u, ink, alpha);
+      outColour = vec4(u, 0, alpha);
     }
   `;
 

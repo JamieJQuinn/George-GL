@@ -176,7 +176,7 @@ function loadScreenInfo(gl) {
 
     void main(void) {
       vec4 grey = vec4(51.0/255.0, 51.0/255.0, 51.0/255.0, 1);
-      float ink = texture(uSampler, vTextureCoord).z;
+      float ink = texture(uSampler, vTextureCoord).x;
       outColour = ink*vec4(70.0/255.0,102.0/255.0,255.0/255.0,1) + (1.0-ink)*grey;
     }
   `;

@@ -24,9 +24,9 @@ function loadInitialProgramInfo(gl) {
     void main(void) {
       vec2 pos = vTextureCoord.xy;
       if(pos.x > 0.1 && pos.x < 0.3) {
-        outColour = vec4(1.0, 0, 1, 0.0);
-      } else {
         outColour = vec4(1.0, 0, 0, 0.0);
+      } else {
+        outColour = vec4(0.5, 0, 0, 0.0);
       }
     }
   `;
